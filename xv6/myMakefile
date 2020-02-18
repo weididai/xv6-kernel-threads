@@ -1,0 +1,41 @@
+Functions added:
+	system calls:
+		int clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack)
+		int join(void **stack)
+	Thread library:
+		int thread_create(void (*start_routine)(void *, void *), void *arg1, void *arg2)
+		int thread_join()
+		void lock_init(lock_t *)
+		void lock_acquire(lock_t *)
+		void lock_release(lock_t *)
+
+
+Detailed descriptions:
+
+clone system call: 
+The clone system call creates a new kernel thread which shares the calling process address space. The new process uses stack as its user stack, which is passed two arguments (arg1 and arg2) and uses a fake return PC (0xffffffff).
+This call is similarly to fork(). But instead create different pgdir, this function share same pgdir with parent. And also set up the stack about argument and return address, in addition to registers.
+
+join system call: 
+This call waits for a child thread that shares the address space with the calling process to exit. It returns the PID of waited-for child or -1 if none. The location of the child user stack is copied into the argument stack (which can then be freed).
+
+thread_create library function:
+This employs clone system call, and use malloc() to allocate a PGSIZE space, and we user some techiniques to let this the pointer be page aligned. 
+		[	]	<- address malloc returned
+		[	]
+		...
+		[	]	<- page aligned address
+		[	]
+		[	]	
+		[	]	<- one page from page aligned address
+		[	]  	<- in this address, we store the address that malloc originally returned
+		[	]
+		...
+In this manner, in the join function we could free the entirelly allocated space by finding the address that malloc returned by stack+PGSIZE+4
+
+thread_join() library function:
+This just free the malloc space
+
+lock library function:
+Those three function just builds a simple ticket lock. 
+
