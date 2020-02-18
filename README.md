@@ -8,7 +8,7 @@ Specifically, you'll do three things. First, you'll define a new system call to 
 
 - system calls:
   - ```int clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack)```
-  - ```int join(void **stack)``
+  - ``int join(void **stack)``
 - Thread library:
   - ```int thread_create(void (*start_routine)(void *, void *), void *arg1, void *arg2)```
   - ```int thread_join()```
